@@ -27,6 +27,22 @@ class TimidAgent(Agent):
         If the pacman is not in danger, we return Directions.STOP
         If the pacman is in danger we return the direction to the ghost.
         """
+        pacmanPos = game.AgentState.getPosition(pacman)     # Pacman position tup.
+        pacX = pacmanPos[0]     # Pacman x position
+        pacY = pacmanPos[1]     # Pacman y position
+        gX = ghost.getPosition()[0]     # Ghost x position
+        gY = ghost.getPosition()[1]     # Ghost y position
+
+
+
+        distX = abs(pacX - gX)      # Distance in from x position.
+        distY = abs(pacY - gY)      # Distance in from y position.
+
+        # If pacman and the ghost are within 3 units of each other...
+        if (pacX == gX and distY <=3 or pacY == gY and distX <= 3):
+            print("Within MinDist: {0} {1}" .format(pacman,ghost))
+
+
 
 
 
@@ -50,14 +66,12 @@ class TimidAgent(Agent):
         """
         # List of directions the agent can choose from
         legal = state.getLegalPacmanActions()
-        action = None
-        dir = None
 
         # Get the agent's state from the game state and find agent heading
         pacmanState = state.getPacmanState()
-        pacmanPos = state.getPacmanPosition()       # Pacman state
-        pacX = pacmanPos[0]     # Pacman x position
-        pacY = pacmanPos[1]     # Pacman y position
+        # pacmanPos = state.getPacmanPosition()       # Pacman state
+        pacmanPos = pacman.GameState.getPacmanPosition(state)
+
 
         heading = pacmanState.getDirection()
 
@@ -68,42 +82,9 @@ class TimidAgent(Agent):
 
         # List of Ghost states
         ghostStates = pacman.GameState.getGhostStates(state)
-        ghost1 = ghostStates[0]     # Ghost1 state
-        ghost2 = ghostStates[1]     # Ghost2 state
-        g1X = ghost1.getPosition()[0]   # Ghost1 x position
-        g1Y = ghost1.getPosition()[1]   # Ghost2 y position
-        g2X = ghost2.getPosition()[0]   # Ghost1 x position
-        g2Y = ghost2.getPosition()[1]   # Ghost2 y position
-        action = None
+
 
         for i in range(len(ghostStates)):
-            minDist = min(abs(pacX - g1X),abs(pacY - g1Y))
-            print(minDist)
-            if (pacX == g1X or pacY == g1Y) and (minDist <= 3):
-                dir = self.inDanger(self,pacmanState,ghost1)
-                print(dir)
-
-
-
-
-
-
-
-
-
-
-
-
-
-        # for ghostState in ghostStates:
-        #     print(len(ghostStates))
-        #     #print("{0} Index: {1}".format(ghostState.getPosition(), i))
-        #     #print(ghostState.getPosition())
-        #     print("Ghost 1: {0}\nGhost 2: {1}".format(ghostStates[0],ghostStates[1]))
-        #
-        #     i += 1
-        #     if not self.inDanger(self, pacmanState, ghostState):
-        #         return Directions.STOP
-
+            action = self.inDanger(pacmanState,ghostStates[i])
 
         return pacmanAgents.LeftTurnAgent.getAction(self,state)
