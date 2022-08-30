@@ -32,59 +32,59 @@ class TimidAgent(Agent):
         pacY = pacmanPos[1]     # Pacman y position
         gX = ghost.getPosition()[0]     # Ghost x position
         gY = ghost.getPosition()[1]     # Ghost y position
-
-
+        heading = pacman.getDirection()     # Direction Pacman is facing
+        dangerHeading = ghost.getDirection()
+        print(dangerHeading)
 
         distX = abs(pacX - gX)      # Distance in from x position.
         distY = abs(pacY - gY)      # Distance in from y position.
 
+
         # If pacman and the ghost are within 3 units of each other...
-        if (pacX == gX and distY <=3 or pacY == gY and distX <= 3):
-            print("Within MinDist: {0} {1}" .format(pacman,ghost))
+        if (pacX == gX and distY <= 3 or pacY == gY and distX <= 3):
+            # If the ghosts are not scared...
+            if not ghost.isScared():
+                return Directions.REVERSE[dangerHeading]      # Return the compass direction of the ghost
 
-
-
-
-
-
-
-        return Directions.STOP
-
-
-
-
-
-        # Your code
-        raise NotImplemented
+        return Directions.STOP      # Otherwise, return the standard STOP direction.
     
     def getAction(self, state):
-        """
-        state - GameState
 
-        
-        Fill in appropriate documentation
-        """
         # List of directions the agent can choose from
         legal = state.getLegalPacmanActions()
 
-        # Get the agent's state from the game state and find agent heading
-        pacmanState = state.getPacmanState()
-        # pacmanPos = state.getPacmanPosition()       # Pacman state
-        pacmanPos = pacman.GameState.getPacmanPosition(state)
+        """***** Pacman Info. *****"""
+        pacmanState = state.getPacmanState()  # Pacman state.
+        heading = pacmanState.getDirection()  # Compass direction of Pacman.
+
+        """***** Ghosts Info. *****"""
+        ghostStates = pacman.GameState.getGhostStates(state)    # List of Ghost states.
 
 
-        heading = pacmanState.getDirection()
 
-        if heading == Directions.STOP:
-            # Pacman is stopped, assume North (true at beginning of game)
-            heading = Directions.NORTH
-
-
-        # List of Ghost states
-        ghostStates = pacman.GameState.getGhostStates(state)
-
-
+        # For every ghost in ghost List...
         for i in range(len(ghostStates)):
-            action = self.inDanger(pacmanState,ghostStates[i])
+            heading = self.inDanger(pacmanState,ghostStates[i])  # Check if Pacman is in danger.
+            # If heading is anything other than STOP...
+            if heading != Directions.STOP:
+                break       # break out.
 
-        return pacmanAgents.LeftTurnAgent.getAction(self,state)
+        if (heading == Directions.STOP):
+            return pacmanAgents.LeftTurnAgent.getAction(self, state)
+
+        # heading = pacmanState.getDirection()
+        reverseDir = Directions.REVERSE[heading]        # Reverse Direction
+
+        if reverseDir in legal:     # Go in reverse
+            action = reverseDir
+        else:
+            #heading = Directions.REVERSE[heading]       # Go back to forward orientation.
+            if Directions.LEFT[reverseDir] in legal:       # Go left.
+                action = Directions.LEFT[reverseDir]
+            elif Directions.RIGHT[reverseDir] in legal:    # Go Right.
+                action = Directions.RIGHT[reverseDir]
+            else:
+                action = Directions.STOP                     # Keep Going to danger.
+        #print(action)
+        return action
+        # return pacmanAgents.LeftTurnAgent.getAction(self,state)
