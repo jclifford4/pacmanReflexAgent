@@ -27,23 +27,36 @@ class TimidAgent(Agent):
         If the pacman is not in danger, we return Directions.STOP
         If the pacman is in danger we return the direction to the ghost.
         """
-        pacmanPos = game.AgentState.getPosition(pacman)     # Pacman position tup.
+        pacmanPos = game.AgentState.getPosition(pacman)  # Pacman position tup.
         pacX = pacmanPos[0]     # Pacman x position
-        pacY = pacmanPos[1]     # Pacman y position
+        pacY = pacmanPos[1]      # Pacman y position
         gX = ghost.getPosition()[0]     # Ghost x position
         gY = ghost.getPosition()[1]     # Ghost y position
-        heading = pacman.getDirection()     # Direction Pacman is facing
-        dangerHeading = ghost.getDirection()    # Direction of the Ghost Danger
 
         distX = abs(pacX - gX)      # Distance in from x position.
         distY = abs(pacY - gY)      # Distance in from y position.
 
-
         # If pacman and the ghost are within 3 units of each other...
-        if (pacX == gX and distY <= 3 or pacY == gY and distX <= 3):
-            # If the ghosts are not scared...
-            if not ghost.isScared():
-                return Directions.REVERSE[dangerHeading]        # Return the compass direction of the ghost
+        # if ghost.isScared():
+        #     return Directions.STOP
+
+        # If Pacman and Ghost are on the same Y intercept and within 3 spaces  and not scared...
+        if (pacX == gX and distY <= 3 and not ghost.isScared()):
+            # If Ghost is under Pacman...
+            if (gY < pacY):
+                return Directions.SOUTH         # Danger in the South.
+            # Otherwise...
+            else:
+                return Directions.NORTH         # Danger in the North.
+
+        # Elif Pacman and Ghost are on the same X intercept and within 3 spaces and not scared...
+        elif pacY == gY and distX <= 3 and not ghost.isScared():
+            # If Ghost is to the left...
+            if gX < pacX:
+                return Directions.WEST          # Danger in the West.
+            # Otherwise...
+            else:
+                return Directions.EAST          # Danger in the East.
                 """
                 Ghost Heading:          Pacman Danger:          G --> P : Danger <-- Pac --> Safe
                     West                    East
@@ -52,42 +65,39 @@ class TimidAgent(Agent):
                     South                   North
                 """
 
-        return Directions.STOP      # Otherwise, return the standard STOP direction.
-    
+        return Directions.STOP  # Otherwise, return the standard STOP direction.
+
     def getAction(self, state):
 
         # List of directions the agent can choose from
         legal = state.getLegalPacmanActions()
 
         """***** Pacman Info. *****"""
-        pacmanState = state.getPacmanState()        # Pacman state.
-        heading = pacmanState.getDirection()        # Compass direction of Pacman.
+        pacmanState = state.getPacmanState()  # Pacman state.
+        heading = pacmanState.getDirection()  # Compass direction of Pacman.
 
         """***** Ghosts Info. *****"""
-        ghostStates = pacman.GameState.getGhostStates(state)    # List of Ghost states.
-
-
+        ghostStates = pacman.GameState.getGhostStates(state)  # List of Ghost states.
 
         # For every ghost in ghost List...
         for i in range(len(ghostStates)):
-            heading = self.inDanger(pacmanState,ghostStates[i])  # Check if Pacman is in danger.
+            heading = self.inDanger(pacmanState, ghostStates[i])  # Check if Pacman is in danger.
             # If heading is anything other than STOP...
             if heading != Directions.STOP:
-                break       # break out, there is danger.
+                break  # break out, there is danger.
 
         if heading == Directions.STOP:
             return pacmanAgents.LeftTurnAgent.getAction(self, state)
 
-        reverseDir = Directions.REVERSE[heading]        # Reverse Direction (opposite of danger direction).
+        reverseDir = Directions.REVERSE[heading]  # Reverse Direction (opposite of danger direction).
 
-        if reverseDir in legal:     # Go in reverse
+        if reverseDir in legal:  # Go in reverse
             action = reverseDir
         else:
-            if Directions.LEFT[reverseDir] in legal:       # Go left.
+            if Directions.LEFT[reverseDir] in legal:  # Go left.
                 action = Directions.LEFT[reverseDir]
-            elif Directions.RIGHT[reverseDir] in legal:    # Go Right.
+            elif Directions.RIGHT[reverseDir] in legal:  # Go Right.
                 action = Directions.RIGHT[reverseDir]
-            else:                                          # No more moves, Stop.
+            else:  # No more moves, Stop.
                 action = Directions.STOP
         return action
-
