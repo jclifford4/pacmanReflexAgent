@@ -36,10 +36,6 @@ class TimidAgent(Agent):
         distX = abs(pacX - gX)      # Distance in from x position.
         distY = abs(pacY - gY)      # Distance in from y position.
 
-        # If pacman and the ghost are within 3 units of each other...
-        # if ghost.isScared():
-        #     return Directions.STOP
-
         # If Pacman and Ghost are on the same Y intercept and within 3 spaces  and not scared...
         if (pacX == gX and distY <= 3 and not ghost.isScared()):
             # If Ghost is under Pacman...
